@@ -84,6 +84,36 @@ export default function App() {
     try { const saved = localStorage.getItem('pocketwise-data'); return saved ? JSON.parse(saved) as AppData : initial }
     catch { return initial }
   })
+  
+  const [cloudStatus, setCloudStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [cloudError, setCloudError] = useState('')
+
+  useEffect(() => {
+    if (!authenticated) return
+
+    let active = true
+    setCloudStatus('loading')
+    setCloudError('')
+
+    loadCloudData()
+      .then(cloudData => {
+        if (!active) return
+        setData(cloudData ?? emptyData)
+        setCloudStatus('ready')
+      })
+      .catch(error => {
+        if (!active) return
+        setCloudError(
+          error instanceof Error ? error.message : 'Could not load your cloud data.'
+        )
+        setCloudStatus('error')
+      })
+
+    return () => {
+      active = false
+    }
+  }, [authenticated])
+
   const [tab, setTab] = useState<Tab>('Overview')
   const [showAdd, setShowAdd] = useState(false)
   const [showIncome, setShowIncome] = useState(false)
