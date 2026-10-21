@@ -207,6 +207,22 @@ export default function App() {
     return <AuthScreen onAuthenticated={() => setAuthenticated(true)} />
   }
 
+  if (cloudStatus === 'loading') {
+    return <main style={{ padding: 40, fontFamily: 'system-ui, sans-serif' }}>
+      Loading your budget from the cloud...
+    </main>
+  }
+
+  if (cloudStatus === 'error') {
+    return <main style={{ padding: 40, fontFamily: 'system-ui, sans-serif' }}>
+      <h1>Could not load your budget</h1>
+      <p>{cloudError}</p>
+      <button onClick={() => window.location.reload()}>
+        Try again
+      </button>
+    </main>
+  }
+
   return <div className="app-shell">
     <aside className="sidebar">
       <div className="brand"><div className="brand-mark"><Wallet size={19}/></div><span>Pocketwise</span></div>
