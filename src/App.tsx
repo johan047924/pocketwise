@@ -168,6 +168,47 @@ function persist(next: AppData) {
   function deleteTransaction(id: string) {
     persist({ ...data, transactions: data.transactions.filter(t => t.id !== id) })
   }
+  
+function editTransaction(transaction: Transaction) {
+  const description = prompt('Description:', transaction.description)
+  if (description === null || !description.trim()) return
+
+  const amountText = prompt('Amount in CAD:', String(transaction.amount))
+  if (amountText === null) return
+
+  const amount = Number(amountText)
+  if (!(amount > 0)) {
+    alert('Please enter an amount greater than zero.')
+    return
+  }
+
+  const category = prompt('Category:', transaction.category)
+  if (category === null || !category.trim()) return
+
+  const date = prompt('Date (YYYY-MM-DD):', transaction.date)
+  if (date === null || !date.trim()) return
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date.trim())) {
+    alert('Please enter the date in YYYY-MM-DD format, for example 2026-10-21.')
+    return
+  }
+
+  persist({
+    ...data,
+    transactions: data.transactions.map(t =>
+      t.id === transaction.id
+        ? {
+            ...t,
+            description: description.trim(),
+            amount,
+            category: category.trim(),
+            date: date.trim()
+          }
+        : t
+    )
+  })
+}
+
   function exportData() {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'pocketwise-backup.json'; a.click(); URL.revokeObjectURL(a.href)
