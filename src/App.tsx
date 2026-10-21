@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Activity, ArrowDownLeft, ArrowUpRight, Bot, CalendarDays, Check, ChevronDown, CircleHelp, CreditCard, LayoutDashboard, Plus, Send, Settings2, Sparkles, Target, Wallet, X, TrendingUp } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import type { AppData, Transaction } from './types'
 import { budgetSpent, money, monthlyRecurring, safeToSpend, thisMonth, total } from './lib/finance'
 import { isCloudConfigured, supabase } from './lib/supabase'
+import AuthScreen from './AuthScreen'
 
 const today = new Date().toISOString().slice(0, 10)
 const initial: AppData = {
