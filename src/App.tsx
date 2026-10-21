@@ -33,6 +33,14 @@ const initial: AppData = {
   ],
   incomeCycles: [{ id: 'i1', date: today, amount: 1200, source: 'Employment' }],
 }
+const emptyData: AppData = {
+  startingBalance: 0,
+  transactions: [],
+  recurring: [],
+  goals: [],
+  budgets: [],
+  incomeCycles: [],
+}
 
 type Tab = 'Overview' | 'Activity' | 'Budgets' | 'Goals' | 'AI Coach'
 const nav: { label: Tab; icon: typeof LayoutDashboard }[] = [
