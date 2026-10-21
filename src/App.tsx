@@ -292,7 +292,68 @@ function persist(next: AppData) {
     }
   }
 }}>···</button>
-</div><strong className="budget-amount">{money(Math.max(0, b.limit - used))}<small> left</small></strong><p>{money(used)} of {money(b.limit)} used</p><div className="progress-track"><div className={pct > 100 ? 'over' : ''} style={{ width: `${Math.min(100, pct)}%` }}/></div><small className="budget-foot">{pct > 100 ? `${money(used - b.limit)} over budget` : `${Math.round(pct)}% of monthly limit`}</small></div>})}</div><div className="panel"><div className="panel-heading"><div><h2>Recurring expenses</h2><p>Upcoming obligations, made visible</p></div><button className="text-button" onClick={() => { const name = prompt('Bill or subscription name?'); if (!name?.trim()) return; const amount = Number(prompt('Amount in CAD?')); if (!(amount > 0)) return; const nextDate = prompt('Next payment date (YYYY-MM-DD)', today) || today; const frequency = prompt('Frequency: weekly, biweekly, monthly, quarterly, yearly', 'monthly') || 'monthly'; persist({ ...data, recurring: [...data.recurring, { id: crypto.randomUUID(), name: name.trim(), amount, category: 'Bills', frequency, nextDate }] }) }}><Plus size={15}/> Add recurring</button></div>{data.recurring.map(r => <div className="recurring-row" key={r.id}><div className="recurring-icon"><CreditCard size={17}/></div><div className="recurring-name"><strong>{r.name}</strong><small>{r.category} · {r.frequency} · Next {r.nextDate}</small></div><strong>{money(r.amount)}</strong></div>)}</div></section>}
+</div><strong className="budget-amount">{money(Math.max(0, b.limit - used))}<small> left</small></strong><p>{money(used)} of {money(b.limit)} used</p><div className="progress-track"><div className={pct > 100 ? 'over' : ''} style={{ width: `${Math.min(100, pct)}%` }}/></div><small className="budget-foot">{pct > 100 ? `${money(used - b.limit)} over budget` : `${Math.round(pct)}% of monthly limit`}</small></div>})}</div><div className="panel"><div className="panel-heading"><div><h2>Recurring expenses</h2><p>Upcoming obligations, made visible</p></div><button className="text-button" onClick={() => { const name = prompt('Bill or subscription name?'); if (!name?.trim()) return; const amount = Number(prompt('Amount in CAD?')); if (!(amount > 0)) return; const nextDate = prompt('Next payment date (YYYY-MM-DD)', today) || today; const frequency = prompt('Frequency: weekly, biweekly, monthly, quarterly, yearly', 'monthly') || 'monthly'; persist({ ...data, recurring: [...data.recurring, { id: crypto.randomUUID(), name: name.trim(), amount, category: 'Bills', frequency, nextDate }] }) }}><Plus size={15}/> Add recurring</button></div>
+{data.recurring.map(r => (
+  <div className="recurring-row" key={r.id}>
+    <div className="recurring-icon"><CreditCard size={17}/></div>
+    <div className="recurring-name">
+      <strong>{r.name}</strong>
+      <small>{r.category} · {r.frequency} · Next {r.nextDate}</small>
+    </div>
+    <strong>{money(r.amount)}</strong>
+    <button
+      className="text-button"
+      type="button"
+      onClick={() => {
+        const name = prompt('Expense name:', r.name)
+        if (name === null || !name.trim()) return
+
+        const amountText = prompt('Amount in CAD:', String(r.amount))
+        if (amountText === null) return
+        const amount = Number(amountText)
+        if (!(amount > 0)) {
+          alert('Please enter an amount greater than zero.')
+          return
+        }
+
+        const nextDate = prompt('Next payment date (YYYY-MM-DD):', r.nextDate)
+        if (nextDate === null || !nextDate.trim()) return
+
+        const frequency = prompt(
+          'Frequency: weekly, biweekly, monthly, quarterly, yearly',
+          r.frequency
+        )
+        if (frequency === null || !frequency.trim()) return
+
+        persist({
+          ...data,
+          recurring: data.recurring.map(x =>
+            x.id === r.id
+              ? { ...x, name: name.trim(), amount, nextDate: nextDate.trim(), frequency: frequency.trim() }
+              : x
+          )
+        })
+      }}
+    >
+      Edit
+    </button>
+    <button
+      className="text-button"
+      type="button"
+      onClick={() => {
+        if (confirm(`Delete "${r.name}"? This cannot be undone.`)) {
+          persist({
+            ...data,
+            recurring: data.recurring.filter(x => x.id !== r.id)
+          })
+        }
+      }}
+    >
+      Delete
+    </button>
+  </div>
+))}
+</div></section>}
 
         {tab === 'Goals' && <section><div className="page-heading"><div><div className="eyebrow">YOUR FUTURE, ON PURPOSE</div><h1>Savings goals</h1><p className="subheading">Turn what matters to you into a plan you can follow.</p></div><button className="primary-button" onClick={() => { const name = prompt('Goal name?'); if (!name?.trim()) return; const target = Number(prompt('Target amount in CAD?')); if (!(target > 0)) return; const saved = Number(prompt('Already saved? (CAD)', '0')) || 0; const dueDate = prompt('Target date (YYYY-MM-DD)', '2027-06-01') || '2027-06-01'; persist({ ...data, goals: [...data.goals, { id: crypto.randomUUID(), name: name.trim(), target, saved, dueDate }] }) }}><Plus size={16}/> New goal</button></div><div className="goal-grid">{data.goals.map(g => { const pct = Math.min(100, g.saved / Math.max(1, g.target) * 100); const days = Math.max(1, Math.ceil((new Date(g.dueDate).getTime() - Date.now()) / 86400000)); const monthly = Math.max(0, g.target - g.saved) / (days / 30.4375); return <div className="panel goal-card" key={g.id}><div className="goal-card-icon"><Target size={20}/></div><div className="goal-card-title"><h2>{g.name}</h2><button className="quiet-icon" onClick={() => { const v = Number(prompt('Add amount saved (CAD):', '50')); if (v > 0) persist({ ...data, goals: data.goals.map(x => x.id === g.id ? { ...x, saved: x.saved + v } : x) }) }}>+ Add savings</button></div><div className="goal-big">{money(g.saved)}<span> / {money(g.target)}</span></div><div className="progress-track"><div style={{ width: `${pct}%` }}/></div><div className="goal-stats"><div><small>Progress</small><strong>{Math.round(pct)}%</strong></div><div><small>Monthly pace needed</small><strong>{money(monthly)}</strong></div><div><small>Target date</small><strong>{g.dueDate}</strong></div></div>
 <button className="subtle-action" onClick={() => {
