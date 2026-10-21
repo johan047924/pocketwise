@@ -137,12 +137,25 @@ export default function App() {
   const safe = safeToSpend(data)
   const recurringMonthly = monthlyRecurring(data)
 
-  function persist(next: AppData) {
-    setData(next)
-    localStorage.setItem('pocketwise-data', JSON.stringify(next))
-    setNotice(isCloudConfigured ? 'Saved locally. Cloud sync setup is ready to connect.' : 'Saved on this device')
-    window.setTimeout(() => setNotice(''), 2400)
-  }
+  
+function persist(next: AppData) {
+  setData(next)
+  localStorage.setItem('pocketwise-data', JSON.stringify(next))
+  setNotice('Saving to your Pocketwise account...')
+
+  void saveCloudData(next)
+    .then(() => {
+      setNotice('Saved to your Pocketwise account')
+    })
+    .catch((error) => {
+      setNotice(
+        error instanceof Error
+          ? `Cloud save failed: ${error.message}`
+          : 'Cloud save failed. Your change is only on this device.'
+      )
+    })
+}
+
   function addTransaction(kind: 'expense' | 'income') {
     const n = Number(amount)
     if (!Number.isFinite(n) || n <= 0) { setNotice('Enter an amount greater than $0'); return }
