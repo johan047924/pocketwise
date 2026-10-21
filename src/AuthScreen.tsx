@@ -25,10 +25,13 @@ export default function AuthScreen({
 
     try {
       if (mode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-        })
+       const { data, error } = await supabase.auth.signUp({
+  email: email.trim(),
+  password,
+  options: {
+    emailRedirectTo: 'https://johan047924.github.io/pocketwise/',
+  },
+})
         if (error) throw error
 
         if (data.session) {
