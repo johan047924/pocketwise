@@ -157,6 +157,17 @@ export default function App() {
     return days
   }, [data.transactions])
 
+  
+  if (!authChecked) {
+    return <main style={{ padding: 40, fontFamily: 'system-ui, sans-serif' }}>
+      Loading Pocketwise...
+    </main>
+  }
+
+  if (!authenticated) {
+    return <AuthScreen onAuthenticated={() => setAuthenticated(true)} />
+  }
+
   return <div className="app-shell">
     <aside className="sidebar">
       <div className="brand"><div className="brand-mark"><Wallet size={19}/></div><span>Pocketwise</span></div>
