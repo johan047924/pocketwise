@@ -40,6 +40,37 @@ const nav: { label: Tab; icon: typeof LayoutDashboard }[] = [
 ]
 
 export default function App() {
+  
+  const [authChecked, setAuthChecked] = useState(false)
+  const [authenticated, setAuthenticated] = useState(false)
+
+  useEffect(() => {
+    if (!supabase) {
+      setAuthChecked(true)
+      return
+    }
+
+    let active = true
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (active) {
+        setAuthenticated(Boolean(data.session))
+        setAuthChecked(true)
+      }
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthenticated(Boolean(session))
+      setAuthChecked(true)
+    })
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
+  }, [])
   const [data, setData] = useState<AppData>(() => {
     try { const saved = localStorage.getItem('pocketwise-data'); return saved ? JSON.parse(saved) as AppData : initial }
     catch { return initial }
