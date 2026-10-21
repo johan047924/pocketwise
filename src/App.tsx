@@ -386,7 +386,51 @@ function persist(next: AppData) {
   </div>
 }
 
-function TransactionList({ transactions, onDelete }: { transactions: Transaction[]; onDelete: (id: string) => void }) {
-  if (!transactions.length) return <div className="empty-panel">No transactions yet. Add your first one to start seeing your money clearly.</div>
-  return <div className="transaction-list">{transactions.map(t => <div className="transaction-row" key={t.id}><div className={`transaction-icon ${t.kind}`} >{t.kind === 'income' ? <ArrowDownLeft size={17}/> : <ArrowUpRight size={17}/>}</div><div className="transaction-name"><strong>{t.description}</strong><small>{t.category} · {new Date(`${t.date}T12:00:00`).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</small></div><strong className={`transaction-amount ${t.kind}`}>{t.kind === 'income' ? '+' : '−'}{money(t.amount)}</strong><button className="delete-transaction" title="Delete transaction" onClick={() => onDelete(t.id)}><X size={15}/></button></div>)}</div>
+
+function TransactionList({ transactions, onDelete, onEdit }: {
+  transactions: Transaction[]
+  onDelete: (id: string) => void
+  onEdit?: (transaction: Transaction) => void
+}) {
+  if (!transactions.length) {
+    return <div className="empty-panel">No transactions yet. Add your first one to start seeing your money clearly.</div>
+  }
+
+  return (
+    <div className="transaction-list">
+      {transactions.map(t => (
+        <div className="transaction-row" key={t.id}>
+          <div className={`transaction-icon ${t.kind}`}>
+            {t.kind === 'income' ? <ArrowDownLeft size={17}/> : <ArrowUpRight size={17}/>}
+          </div>
+
+          <div className="transaction-name">
+            <strong>{t.description}</strong>
+            <small>{t.category} · {new Date(`${t.date}T12:00:00`).toLocaleDateString('en-CA', { month: 'short', day: 'numeric' })}</small>
+          </div>
+
+          <strong className={`transaction-amount ${t.kind}`}>
+            {t.kind === 'income' ? '+' : '−'}{money(t.amount)}
+          </strong>
+
+          <button
+            className="text-button"
+            type="button"
+            onClick={() => onEdit?.(t)}
+          >
+            Edit
+          </button>
+
+          <button
+            className="delete-transaction"
+            title="Delete transaction"
+            onClick={() => onDelete(t.id)}
+          >
+            <X size={15}/>
+          </button>
+        </div>
+      ))}
+    </div>
+  )
 }
+
