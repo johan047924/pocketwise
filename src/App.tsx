@@ -5,6 +5,7 @@ import type { AppData, Transaction } from './types'
 import { budgetSpent, money, monthlyRecurring, safeToSpend, thisMonth, total } from './lib/finance'
 import { isCloudConfigured, supabase } from './lib/supabase'
 import AuthScreen from './AuthScreen'
+import { loadCloudData } from './lib/cloudStorage'
 
 const today = new Date().toISOString().slice(0, 10)
 const initial: AppData = {
