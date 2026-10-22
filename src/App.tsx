@@ -167,9 +167,15 @@ if (kind === 'income') next.incomeCycles = [{ id: crypto.randomUUID(), transacti
 
     persist(next); setShowAdd(false); setShowIncome(false); setAmount(''); setDescription('')
   }
-  function deleteTransaction(id: string) {
-    persist({ ...data, transactions: data.transactions.filter(t => t.id !== id) })
-  }
+
+function deleteTransaction(id: string) {
+  persist({
+    ...data,
+    transactions: data.transactions.filter(t => t.id !== id),
+    incomeCycles: data.incomeCycles.filter(c => c.transactionId !== id)
+  })
+}
+
   
 function editTransaction(transaction: Transaction) {
   const description = prompt('Description:', transaction.description)
