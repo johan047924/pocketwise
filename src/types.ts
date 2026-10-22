@@ -7,7 +7,13 @@ export type RecurringExpense = {
 }
 export type Goal = { id: string; name: string; target: number; saved: number; dueDate: string }
 export type Budget = { category: string; limit: number }
-export type IncomeCycle = { id: string; date: string; amount: number; source: string }
+export type IncomeCycle = {
+  id: string
+  date: string
+  amount: number
+  source: string
+  transactionId?: string
+}
 export type AppData = {
   transactions: Transaction[]; recurring: RecurringExpense[]; goals: Goal[];
   budgets: Budget[]; incomeCycles: IncomeCycle[]; startingBalance: number
