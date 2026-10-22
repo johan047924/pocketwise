@@ -7,6 +7,7 @@ import { isCloudConfigured, supabase } from './lib/supabase'
 import AuthScreen from './AuthScreen'
 import { loadCloudData } from './lib/cloudStorage'
 import { saveCloudData } from './lib/cloudStorage'
+import { askPocketwiseAI } from './lib/ai'
 
 const today = new Date().toISOString().slice(0, 10)
 const initial: AppData = {
