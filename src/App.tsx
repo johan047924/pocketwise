@@ -195,20 +195,34 @@ function editTransaction(transaction: Transaction) {
     return
   }
 
+
+  const updatedTransaction = {
+    ...transaction,
+    description: description.trim(),
+    amount,
+    category: category.trim(),
+    date: date.trim()
+  }
+
   persist({
     ...data,
     transactions: data.transactions.map(t =>
-      t.id === transaction.id
-        ? {
-            ...t,
-            description: description.trim(),
-            amount,
-            category: category.trim(),
-            date: date.trim()
-          }
-        : t
-    )
+      t.id === transaction.id ? updatedTransaction : t
+    ),
+    incomeCycles: transaction.kind === 'income'
+      ? data.incomeCycles.map(c =>
+          c.transactionId === transaction.id
+            ? {
+                ...c,
+                date: updatedTransaction.date,
+                amount: updatedTransaction.amount,
+                source: updatedTransaction.description
+              }
+            : c
+        )
+      : data.incomeCycles
   })
+
 }
 
   function exportData() {
