@@ -216,17 +216,41 @@ function editTransaction(transaction: Transaction) {
       t.id === transaction.id ? updatedTransaction : t
     ),
     incomeCycles: transaction.kind === 'income'
-      ? data.incomeCycles.map(c =>
-          c.transactionId === transaction.id
-            ? {
-                ...c,
-                date: updatedTransaction.date,
-                amount: updatedTransaction.amount,
-                source: updatedTransaction.description
-              }
-            : c
-        )
-      : data.incomeCycles
+  ? (() => {
+      const linked = data.incomeCycles.filter(
+        c => c.transactionId === transaction.id
+      )
+
+      const legacy = data.incomeCycles.filter(
+        c =>
+          !c.transactionId &&
+          c.date === transaction.date &&
+          c.amount === transaction.amount &&
+          c.source === transaction.description
+      )
+
+      const targetId =
+        linked.length === 1
+          ? linked[0].id
+          : linked.length === 0 && legacy.length === 1
+            ? legacy[0].id
+            : null
+
+      return targetId
+        ? data.incomeCycles.map(c =>
+            c.id === targetId
+              ? {
+                  ...c,
+                  transactionId: transaction.id,
+                  date: updatedTransaction.date,
+                  amount: updatedTransaction.amount,
+                  source: updatedTransaction.description
+                }
+              : c
+          )
+        : data.incomeCycles
+    })()
+  : data.incomeCycles
   })
 
 }
