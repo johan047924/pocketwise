@@ -260,34 +260,30 @@ function editTransaction(transaction: Transaction) {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'pocketwise-backup.json'; a.click(); URL.revokeObjectURL(a.href)
   }
-  async function askCoach() {
-    const q = question.trim()
-    if (!q || saving) return
-    setChat(prev => [...prev, { role: 'user', text: q }]); setQuestion(''); setSaving(true)
-    try {
-      if (!import.meta.env.VITE_AI_FUNCTION_URL) throw new Error('AI endpoint is not configured yet')
-      const response = await fetch(import.meta.env.VITE_AI_FUNCTION_URL as string, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q, financialSummary: {
-          currency: 'CAD', monthIncome: income, monthSpending: spent, budgets: data.budgets,
-          transactions: monthTransactions.slice(0, 100), recurring: data.recurring, goals: data.goals,
-          safeToSpend: safe.safe, estimatedBalance: safe.balance
-        } })
-      })
-      if (!response.ok) throw new Error('AI service returned an error. Check your server setup.')
-      const result = await response.json() as { answer?: string }
-      setChat(prev => [...prev, { role: 'assistant', text: result.answer || 'I could not produce an answer this time.' }])
-    } catch {
-      const lower = q.toLowerCase()
-      let answer = 'The AI connection is not configured yet. Your budgeting tools still work. Once the secure server function is deployed, I can analyze your actual entered data and explain trade-offs.'
-      if (lower.includes('safe') || lower.includes('spend') || lower.includes('afford')) answer = `Your current rough safe-to-spend estimate is ${money(safe.safe)} after reserving ${money(safe.futureBills)} for recurring bills due in the next 14 days and ${money(safe.goalReserve)} for near-term goal contributions. This is only as accurate as the balances and future income you've entered.`
-      else if (lower.includes('where') || lower.includes('spent') || lower.includes('spending')) {
-        const top = [...new Set(monthTransactions.filter(t => t.kind === 'expense').map(t => t.category))].map(c => ({ c, n: budgetSpent(data, c) })).sort((a, b) => b.n - a.n)[0]
-        answer = `You've recorded ${money(spent)} in spending this month. Your largest recorded category is ${top ? `${top.c} (${money(top.n)})` : 'not available yet'}. Add transactions consistently for a more reliable picture.`
-      }
-      setChat(prev => [...prev, { role: 'assistant', text: answer }])
-    } finally { setSaving(false) }
+  
+async function askCoach() {
+  const q = question.trim()
+  if (!q || saving) return
+
+  setChat(prev => [...prev, { role: 'user', text: q }])
+  setQuestion('')
+  setSaving(true)
+
+  try {
+    const answer = await askPocketwiseAI(q)
+    setChat(prev => [...prev, { role: 'assistant', text: answer }])
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'Pocketwise AI could not respond. Please try again.'
+
+    setChat(prev => [...prev, { role: 'assistant', text: message }])
+  } finally {
+    setSaving(false)
   }
+}
+
 
   const chartData = useMemo(() => {
     const days = Array.from({ length: 7 }, (_, i) => {
