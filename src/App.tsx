@@ -162,7 +162,9 @@ function persist(next: AppData) {
     const tx: Transaction = { id: crypto.randomUUID(), kind, amount: Math.round(n * 100) / 100,
       description: description.trim() || (kind === 'expense' ? category : 'Income'), category, date }
     const next = { ...data, transactions: [tx, ...data.transactions] }
-    if (kind === 'income') next.incomeCycles = [{ id: crypto.randomUUID(), date, amount: tx.amount, source: tx.description }, ...data.incomeCycles]
+    
+if (kind === 'income') next.incomeCycles = [{ id: crypto.randomUUID(), transactionId: tx.id, date, amount: tx.amount, source: tx.description }, ...data.incomeCycles]
+
     persist(next); setShowAdd(false); setShowIncome(false); setAmount(''); setDescription('')
   }
   function deleteTransaction(id: string) {
